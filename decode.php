@@ -20,6 +20,7 @@
 // $meta = "checkstego";
 // $msg = "checkstego*";
 $src = "out.png";
+$pin = "1212";
 
 
 // init
@@ -45,15 +46,15 @@ switch( $img_t )
 
 
 // run
-$meta = _extract( $img, 0, 1 );
-var_dump($meta);
-$data = _extract( $img, 1, $img_h );
+// $meta = _extract( $img, 0, 1 );
+// var_dump($meta);
+$data = _extract( $img, $pin, 1, $img_h );
 var_dump($data);
 // file_put_contents( $meta, $data );
 
 
 // functions
-function _extract( $img, $start_line, $end_line )
+function _extract( $img, $pin, $start_line, $end_line )
 {
   global $img_w;
 
@@ -78,15 +79,36 @@ function _extract( $img, $start_line, $end_line )
   $l = count( $t_str );
   for( $i=0 ; $i<$l ; $i++ ) {
     $c = chr( bindec($t_str[$i]) );
-    if( $c == '*') {
+    var_dump($c);
+    if( _checklimiter($t_str, $i)) {
       break;
     } else {
       $final .= $c;
     }
   }
 
-  var_dump( $final );
-  return $final;
+  // var_dump( $final );
+  return _decryptmsg($final, $pin);
+}
+
+function _decryptmsg($msg, $pin){
+  $msg_length = strlen($msg);
+  $pin_iteration = 0;
+  for ($i=0; $i < $msg_length; $i++) { 
+    $msg[$i] = chr(ord($msg[$i])-$pin[$pin_iteration++]);
+    if ($pin_iteration >= 4) {
+      $pin_iteration = 0;
+    }
+  }
+  return $msg;
+}
+
+function _checklimiter($t_str, $iteration){
+  if (chr(bindec($t_str[$iteration])) == '!' && chr(bindec($t_str[$iteration+1])) == '#' && chr(bindec($t_str[$iteration+2])) == '$') {
+    return true;
+  } else {
+    return false;
+  }
 }
 
 

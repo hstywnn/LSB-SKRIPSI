@@ -31,8 +31,9 @@
   //   $msg = base64_encode($msg) . '*';
   //var_dump( $msg );
   $meta = "checkstego";
-  $msg = "checkstego*";
-  $dst = "image1.png";
+  $msg = "pesan stego";
+  $pin = '1212';
+  $dst = "assets/image1.png";
 
 
   
@@ -64,20 +65,39 @@
   
   
   // run
-  inject( $img, $meta, 0 );
-  inject( $img, $msg, 1 );
+  // inject( $img, $meta, 0 );
+  if (inject( $img, $msg, $pin, 1 ) == "success_input") {
+    var_dump("success");
+  }
   // png output because of the quality of the renderer image
   imagepng( $img, 'out.png' );
   
+  function _encryptmsg($msg, $pin){
+    $msg_length = strlen($msg);
+    $pin_iteration = 0;
+    for ($i=0; $i < $msg_length; $i++) { 
+      $msg[$i] = chr(ord($msg[$i])+$pin[$pin_iteration++]);
+      if ($pin_iteration >= 4) {
+        $pin_iteration = 0;
+      }
+    }
+    return $msg;
+  }
   
-  function inject( $img, $data, $start_line )
+  function inject( $img, $data, $pin, $start_line )
   {
     global $img_w;
   
     $str = '';
-    $l = strlen( $data );
+    $stopper = '!#$';
+    $full_msg = _encryptmsg($data, $pin).$stopper;
+    // var_dump($full_msg);
+    // var_dump(_encryptmsg($data, $pin));
+    $l = strlen( $full_msg );
+
     for( $i=0 ; $i<$l ; $i++) { // convert message to binary
-      $str .= sprintf( "%08b", ord($data[$i]) );
+      // var_dump(ord($full_msg[$i]));
+      $str .= sprintf( "%08b", ord($full_msg[$i]) );
     }
     //var_dump( $str );
   
@@ -120,6 +140,8 @@
         $y++;
       }
     }
+
+    return "success_input";
   }
   
   
