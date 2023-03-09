@@ -9,7 +9,7 @@ Yo ngonolah
 - [x] Create Init Project
 - [x] Coba LSB
 - [x] Coba Enkripsi PIN
-- [] LSB + enkripsi + code logic adjustment
-- [] Rancang Tampilan
-- [] Combine tampilan ro logic
-- [] Run Tests 
+- [ ] LSB + enkripsi + code logic adjustment
+- [ ] Rancang Tampilan
+- [ ] Combine tampilan ro logic
+- [ ] Run Tests 
