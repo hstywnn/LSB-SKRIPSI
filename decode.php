@@ -19,7 +19,7 @@
 
 // $meta = "checkstego";
 // $msg = "checkstego*";
-$src = "out.png";
+$src = "assets/hasil.png";
 $pin = "1212";
 
 
@@ -27,6 +27,7 @@ $pin = "1212";
 $t_info = getimagesize( $src );
 $img_w = $t_info[0];
 $img_h = $t_info[1];
+$img_size = $img_w*$img_h;
 $img_t = $t_info['mime'];
 
 switch( $img_t )
@@ -48,7 +49,7 @@ switch( $img_t )
 // run
 // $meta = _extract( $img, 0, 1 );
 // var_dump($meta);
-$data = _extract( $img, $pin, 1, $img_h );
+$data = _extract( $img, $pin, 0, $img_h );
 var_dump($data);
 // file_put_contents( $meta, $data );
 
@@ -56,39 +57,59 @@ var_dump($data);
 // functions
 function _extract( $img, $pin, $start_line, $end_line )
 {
-  global $img_w;
+  global $img_w, $img_size;
 
   $str = '';
-  for( $y=$start_line ; $y<$end_line ; $y++ ) {
-    for( $x=0 ; $x<$img_w ; $x++ ) {
-      $rgb = _imagecolorat( $img, $x, $y );
-      //var_dump( $rgb );
-      $red = decbin( $rgb['r'] );
-      $str .= $red[strlen($red)-1];
-      $green = decbin( $rgb['g'] );
-      $str .= $green[strlen($green)-1];
-      $blue = decbin( $rgb['b'] );
-      $str .= $blue[strlen($blue)-1];
-    }
-  }
-  //var_dump( $str );
+  $bit_string_counter = 0;
+  $string_container = '';
+  $color_space_list = ['r', 'g', 'b'];
+  $stop_status = 0;
 
-  $final = '';
-  $t_str = str_split( $str, 8 );
-  //var_dump( $t_str );
-  $l = count( $t_str );
-  for( $i=0 ; $i<$l ; $i++ ) {
-    $c = chr( bindec($t_str[$i]) );
-    var_dump($c);
-    if( _checklimiter($t_str, $i)) {
+
+  for ($i=0; $i < 3 ;$i++) {
+    for( $y=$start_line ; $y<$end_line ; $y++ ) {
+      for( $x=0 ; $x<$img_w ; $x++ ) {
+        $rgb = _imagecolorat( $img, $x, $y );
+
+        $color_space = decbin( $rgb[$color_space_list[$i]] );
+        $str .= $color_space[strlen($color_space)-1];
+        $bit_string_counter++;
+        if ($bit_string_counter % 8 == 0) {
+          $string_container .= chr(bindec($str));
+          $str = '';
+        }
+        if (strpos($string_container,'!#$')) {
+          $stop_status = 1;
+          break;
+        }
+      }
+      if ($stop_status != 0) {
+        break;
+      }
+    }
+    if ($stop_status != 0) {
       break;
-    } else {
-      $final .= $c;
     }
   }
+  $string_container = str_replace("!#$","",$string_container);
+  var_dump( $string_container );
+
+  // $final = '';
+  // $t_str = str_split( $str, 8 );
+  // //var_dump( $t_str );
+  // $l = count( $t_str );
+  // for( $i=0 ; $i<$l ; $i++ ) {
+  //   $c = chr( bindec($t_str[$i]) );
+  //   var_dump($c);
+  //   if( _checklimiter($t_str, $i)) {
+  //     break;
+  //   } else {
+  //     $final .= $c;
+  //   }
+  // }
 
   // var_dump( $final );
-  return _decryptmsg($final, $pin);
+  return _decryptmsg($string_container, $pin);
 }
 
 function _decryptmsg($msg, $pin){

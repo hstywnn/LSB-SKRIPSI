@@ -1,52 +1,23 @@
 <?php
-// function usage( $err=null ) {
-//     echo 'Usage: '.$_SERVER['argv'][0]." <file to hide> <host file JPEG|GIF|PNG>\n";
-//     if( $err ) {
-//       echo 'Error: '.$err."\n";
-//     }
-//     exit();
-//   }
-  
-//   if( $_SERVER['argc'] != 3 ) {
-//     usage();
-//   }
-  
-//   $src = $_SERVER['argv'][1];
-//   if( !is_file($src) ) {
-//     usage( 'cannot find source file !' );
-//   }
-  
-//   $dst = $_SERVER['argv'][2];
-//   if( !is_file($dst) ) {
-//     usage( 'cannot find image destination file !' );
-//   }
-  
-  
-  // init
-//   $meta = basename( $src );
-//   $meta = base64_encode($meta) . '*';
-  //var_dump( $meta );
-  
-  //   $msg = file_get_contents( $src );
-  //   $msg = base64_encode($msg) . '*';
-  //var_dump( $msg );
+  date_default_timezone_set("Asia/Jakarta");
   $meta = "checkstego";
-  $msg = "pesan stego";
+  // $msg = "pesan stego";
+  $msg = "pesan stego dummy! tambah lagi heh";
   $pin = '1212';
-  $dst = "assets/image1.png";
+  // $dst = "assets/image1.png";
+  $dst = "assets/test small image.png";
 
-
-  
   $t_info = getimagesize( $dst );
   $img_w = $t_info[0];
   $img_h = $t_info[1];
   $img_t = $t_info['mime'];
+  $img_size = $img_w*$img_h;
   $line_length = ($img_w*3) / 8;
-  $max_length = $line_length * ($img_h-1);
+  $max_length = $line_length * ($img_h);
   
-  if( $max_length < strlen($msg) || $line_length < strlen($meta) ) {
-    usage( 'message is too long or image is too small' );
-  }
+  // if( $max_length < (strlen($msg)+3) || $line_length < strlen($meta) ) {
+  //   echo( 'message is too long or image is too small' );
+  // }
   
   switch( $img_t )
   {
@@ -66,11 +37,17 @@
   
   // run
   // inject( $img, $meta, 0 );
-  if (inject( $img, $msg, $pin, 1 ) == "success_input") {
-    var_dump("success");
+  if ($max_length >= (strlen($msg)+3)) {
+    if (inject( $img, $msg, $pin, 0 ) == "success_input") {
+      var_dump("success");
+    }
+  }else{
+    echo( 'message is too long or image is too small' );
+    echo($max_length." -- ". strlen($msg)+3);
   }
   // png output because of the quality of the renderer image
-  imagepng( $img, 'out.png' );
+  // imagepng( $img, "assets/hasil-".time().".png" );
+  imagepng( $img, "assets/hasil.png" );
   
   function _encryptmsg($msg, $pin){
     $msg_length = strlen($msg);
@@ -86,58 +63,63 @@
   
   function inject( $img, $data, $pin, $start_line )
   {
-    global $img_w;
+    global $img_w, $img_size;
   
     $str = '';
     $stopper = '!#$';
     $full_msg = _encryptmsg($data, $pin).$stopper;
     // var_dump($full_msg);
     // var_dump(_encryptmsg($data, $pin));
-    $l = strlen( $full_msg );
+    $msg_length = strlen( $full_msg );
+    $color_space_list = ['r', 'g', 'b'];
 
-    for( $i=0 ; $i<$l ; $i++) { // convert message to binary
+    for( $i=0 ; $i<$msg_length ; $i++) { // convert message to binary
       // var_dump(ord($full_msg[$i]));
       $str .= sprintf( "%08b", ord($full_msg[$i]) );
     }
     //var_dump( $str );
   
-    $x = 0;
-    $y = $start_line;
-    $l = strlen( $str );
+    $msg_length = strlen( $str );
+    $bit_string_counter = 0;
   
-    for( $i=0 ; $i<$l ; )
-    {
-      $rgb = _imagecolorat( $img, $x, $y );
-      //var_dump( $rgb );
+    for ($i=0; $i < 3 ;$i++) { 
+      $x = 0;
+      $y = $start_line;
+      if( $bit_string_counter < $msg_length ) {
+        for( $j=0 ; $j<$img_size ; $j++)
+        {
+          if( $bit_string_counter < $msg_length ) {
+            $rgb = _imagecolorat( $img, $x, $y );
   
-      if( $i < $l ) {
-        $red = decbin( $rgb['r'] );
-        $red[strlen($red)-1] = $str[$i++];
-        $rgb['r'] = bindec( $red );
-        //var_dump( $red );
-      }
+            $color_space = decbin( $rgb[$color_space_list[$i]] );
+            $color_space[strlen($color_space)-1] = $str[$bit_string_counter];
+            $rgb[$color_space_list[$i]] = bindec( $color_space );
+            $bit_string_counter++;
+            $to_var_dump = array(
+              "ruang" => $color_space_list[$i],
+              "bitcounter" => $bit_string_counter,
+              "msg_length" => $msg_length,
+              "j" => $j,
+              "imgsize" => $img_size,
+              "x" => $x,
+              "y" => $y
+            );
+            print_r(json_encode($to_var_dump));
+            echo "<br>";
   
-      if( $i < $l ) {
-        $green = decbin( $rgb['g'] );
-        $green[strlen($green)-1] = $str[$i++];
-        $rgb['g'] = bindec( $green );
-        //var_dump( $green );
-      }
+            _imagesetpixel( $img, $x, $y, $rgb );
   
-      if( $i < $l ) {
-        $blue = decbin( $rgb['b'] );
-        $blue[strlen($blue)-1] = $str[$i++];
-        $rgb['b'] = bindec( $blue );
-        //var_dump( $blue );
-      }
-  
-      //var_dump( $rgb );
-      _imagesetpixel( $img, $x, $y, $rgb );
-  
-      $x++;
-      if( $x == $img_w ) {
-        $x = 0;
-        $y++;
+            $x++;
+            if( $x == $img_w ) {
+              $x = 0;
+              $y++;
+            }
+          }else{
+            break;
+          }
+        }
+      }else{
+        break;
       }
     }
 
