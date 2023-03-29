@@ -1,11 +1,27 @@
 <?php
+  echo "<pre>";
+  print_r($_FILES);
+  print_r($_POST);
+  echo "</pre>";
+
+  // ambil data file
+  $file_name = $_FILES['form_gambar']['name'];
+  $file_tmp_name = $_FILES['form_gambar']['tmp_name'];
+
+  // tentukan lokasi file akan dipindahkan
+  $upload_directory = "assets/";
+
+  // pindahkan file
+  move_uploaded_file($file_tmp_name, $upload_directory."testEncode - ".$file_name);
+
   date_default_timezone_set("Asia/Jakarta");
+
   $meta = "checkstego";
-  // $msg = "pesan stego";
-  $msg = "pesan stego dummy! tambah lagi heh";
-  $pin = '1212';
+  // $msg = "pesan stego dummy! tambah lagi heh";
+  $msg = $_POST['form_pesan'];
+  $pin = $_POST['form_PIN'];
   // $dst = "assets/image1.png";
-  $dst = "assets/test small image.png";
+  $dst = $upload_directory."testEncode - ".$file_name;
 
   $t_info = getimagesize( $dst );
   $img_w = $t_info[0];

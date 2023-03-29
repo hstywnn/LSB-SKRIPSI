@@ -1,27 +1,24 @@
 <?php
+echo "<pre>";
+print_r($_FILES);
+print_r($_POST);
+echo "</pre>";
 
-// function usage( $err=null ) {
-//   echo 'Usage: '.$_SERVER['argv'][0]." <file hosting the message JPEG|GIF|PNG>\n";
-//   if( $err ) {
-//     echo 'Error: '.$err."\n";
-//   }
-//   exit();
-// }
+// ambil data file
+$file_name = $_FILES['form_gambar']['name'];
+$file_tmp_name = $_FILES['form_gambar']['tmp_name'];
 
-// if( $_SERVER['argc'] != 2 ) {
-//   usage();
-// }
+// tentukan lokasi file akan dipindahkan
+$upload_directory = "assets/";
 
-// $src = $_SERVER['argv'][1];
-// if( !is_file($src) ) {
-//   usage( 'cannot find image source file !' );
-// }
+// pindahkan file
+move_uploaded_file($file_tmp_name, $upload_directory."testDecode - ".$file_name);
 
-// $meta = "checkstego";
-// $msg = "checkstego*";
-$src = "assets/hasil.png";
-$pin = "1212";
+// $src = "assets/hasil.png";
+// $pin = "1212";
 
+$src = $upload_directory."testDecode - ".$file_name;
+$pin = $_POST['form_PIN'];
 
 // init
 $t_info = getimagesize( $src );
@@ -47,11 +44,8 @@ switch( $img_t )
 
 
 // run
-// $meta = _extract( $img, 0, 1 );
-// var_dump($meta);
 $data = _extract( $img, $pin, 0, $img_h );
 var_dump($data);
-// file_put_contents( $meta, $data );
 
 
 // functions
@@ -78,6 +72,15 @@ function _extract( $img, $pin, $start_line, $end_line )
           $string_container .= chr(bindec($str));
           $str = '';
         }
+
+        $to_var_dump = array(
+          "ruang" => $color_space_list[$i],
+          "bitcounter" => $bit_string_counter,
+          "string_container" => $string_container
+        );
+        print_r(json_encode($to_var_dump));
+        echo "<br>";
+
         if (strpos($string_container,'!#$')) {
           $stop_status = 1;
           break;
@@ -94,21 +97,6 @@ function _extract( $img, $pin, $start_line, $end_line )
   $string_container = str_replace("!#$","",$string_container);
   var_dump( $string_container );
 
-  // $final = '';
-  // $t_str = str_split( $str, 8 );
-  // //var_dump( $t_str );
-  // $l = count( $t_str );
-  // for( $i=0 ; $i<$l ; $i++ ) {
-  //   $c = chr( bindec($t_str[$i]) );
-  //   var_dump($c);
-  //   if( _checklimiter($t_str, $i)) {
-  //     break;
-  //   } else {
-  //     $final .= $c;
-  //   }
-  // }
-
-  // var_dump( $final );
   return _decryptmsg($string_container, $pin);
 }
 
@@ -123,15 +111,6 @@ function _decryptmsg($msg, $pin){
   }
   return $msg;
 }
-
-function _checklimiter($t_str, $iteration){
-  if (chr(bindec($t_str[$iteration])) == '!' && chr(bindec($t_str[$iteration+1])) == '#' && chr(bindec($t_str[$iteration+2])) == '$') {
-    return true;
-  } else {
-    return false;
-  }
-}
-
 
 function _imagecolorat( $img, $x, $y ) {
   $rgb = imagecolorat( $img, $x, $y );
