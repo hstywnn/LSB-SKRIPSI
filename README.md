@@ -9,7 +9,8 @@ Yo ngonolah
 - [x] Create Init Project
 - [x] Coba LSB
 - [x] Coba Enkripsi PIN
-- [ ] LSB + enkripsi + code logic adjustment
+- [x] LSB + enkripsi + code logic adjustment
+- [x] Gawe itungan MSE ro PSNR
 - [ ] Rancang Tampilan
 - [ ] Combine tampilan ro logic
 - [ ] Run Tests 

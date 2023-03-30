@@ -14,8 +14,6 @@ $upload_directory = "assets/";
 // pindahkan file
 move_uploaded_file($file_tmp_name, $upload_directory."testDecode - ".$file_name);
 
-// $src = "assets/hasil.png";
-// $pin = "1212";
 
 $src = $upload_directory."testDecode - ".$file_name;
 $pin = $_POST['form_PIN'];
@@ -73,13 +71,15 @@ function _extract( $img, $pin, $start_line, $end_line )
           $str = '';
         }
 
-        $to_var_dump = array(
-          "ruang" => $color_space_list[$i],
-          "bitcounter" => $bit_string_counter,
-          "string_container" => $string_container
-        );
-        print_r(json_encode($to_var_dump));
-        echo "<br>";
+        // ###KEBUTUHAN DEBUG###
+        // ----------------------------------
+        // $to_var_dump = array(
+        //   "ruang" => $color_space_list[$i],
+        //   "bitcounter" => $bit_string_counter,
+        //   "string_container" => $string_container
+        // );
+        // print_r(json_encode($to_var_dump));
+        // echo "<br>";
 
         if (strpos($string_container,'!#$')) {
           $stop_status = 1;
@@ -95,17 +95,17 @@ function _extract( $img, $pin, $start_line, $end_line )
     }
   }
   $string_container = str_replace("!#$","",$string_container);
-  var_dump( $string_container );
 
   return _decryptmsg($string_container, $pin);
 }
 
 function _decryptmsg($msg, $pin){
   $msg_length = strlen($msg);
+  $pin_length = strlen($pin);
   $pin_iteration = 0;
   for ($i=0; $i < $msg_length; $i++) { 
     $msg[$i] = chr(ord($msg[$i])-$pin[$pin_iteration++]);
-    if ($pin_iteration >= 4) {
+    if ($pin_iteration >= $pin_length) {
       $pin_iteration = 0;
     }
   }
