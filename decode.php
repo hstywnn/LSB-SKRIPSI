@@ -1,8 +1,8 @@
 <?php
-echo "<pre>";
-print_r($_FILES);
-print_r($_POST);
-echo "</pre>";
+// echo "<pre>";
+// print_r($_FILES);
+// print_r($_POST);
+// echo "</pre>";
 
 // ambil data file
 $file_name = $_FILES['form_gambar']['name'];
@@ -43,7 +43,7 @@ switch( $img_t )
 
 // run
 $data = _extract( $img, $pin, 0, $img_h );
-var_dump($data);
+echo $data;
 
 
 // functions

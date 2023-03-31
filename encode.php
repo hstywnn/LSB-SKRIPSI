@@ -1,8 +1,8 @@
 <?php
-  echo "<pre>";
-  print_r($_FILES);
-  print_r($_POST);
-  echo "</pre>";
+  // echo "<pre>";
+  // print_r($_FILES);
+  // print_r($_POST);
+  // echo "</pre>";
 
   // ambil data file
   $file_name = $_FILES['form_gambar']['name'];
@@ -28,6 +28,7 @@
   $img_size = $img_w*$img_h;
   $line_length = ($img_w*3) / 8;
   $max_length = $line_length * ($img_h);
+  $time_identifier = time();
   
   switch( $img_t )
   {
@@ -48,12 +49,20 @@
   // run
   if ($max_length >= (strlen($msg)+3)) {
     if (inject( $img, $msg, $pin, 0 ) == "success_input") {
-      imagepng( $img, "assets/hasil.png" );
+      imagepng( $img, "assets/hasil-".$time_identifier.".png" );
       $image_comparation = _calculatePSNR('assets/hasil.png', $dst);
-      echo "<pre>";
-      print_r($image_comparation);
-      echo "</pre>";
-      var_dump("success encode");
+      // echo "<pre>";
+      // print_r($image_comparation);
+      // echo "</pre>";
+      // var_dump("success encode");
+      $json_response = json_encode(
+        array(
+          'stego_file' => "assets/hasil-".$time_identifier.".png",
+          'psnr' => $image_comparation['PSNR'],
+          'mse' => $image_comparation['MSE']
+        )
+      );
+      print_r($json_response);
     }
   }else{
     echo( 'message is too long or image is too small' );
