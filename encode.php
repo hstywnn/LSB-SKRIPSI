@@ -50,7 +50,7 @@
   if ($max_length >= (strlen($msg)+3)) {
     if (inject( $img, $msg, $pin, 0 ) == "success_input") {
       imagepng( $img, "assets/hasil-".$time_identifier.".png" );
-      $image_comparation = _calculatePSNR('assets/hasil.png', $dst);
+      $image_comparation = _calculatePSNR("assets/hasil-".$time_identifier.".png", $dst);
       // echo "<pre>";
       // print_r($image_comparation);
       // echo "</pre>";

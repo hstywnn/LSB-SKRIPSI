@@ -25,7 +25,9 @@ function sendEncode(fd){
 				// console.log(response);
 				var resp = JSON.parse(response);
 				// var cek = str.includes("data:image/png;base64,");
-				console.log(document.getElementById('image_download'));
+				// console.log(document.getElementById('image_download'));
+				console.log(resp);
+				console.log("hehehe");
                 document.getElementById('cover_image').src="../"+resp.stego_file;
                 document.getElementById('image_download').href="../"+resp.stego_file;
                 document.getElementById('image_comparation').innerText = "PSNR: "+resp.psnr+", MSE: "+resp.mse;	
